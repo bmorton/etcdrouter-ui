@@ -1,0 +1,6 @@
+#!/bin/bash -l
+export DOCKER_HOST_IP=`/sbin/ip route | awk '/default/ { print $3 }'`
+export ETCDCTL_PEERS="http://${DOCKER_HOST_IP}:4001/"
+
+# Execute the commands passed to this script
+$@

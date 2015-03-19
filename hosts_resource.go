@@ -31,7 +31,7 @@ type HostsResponse struct {
 func (hr *HostsResource) Index(u *url.URL, h http.Header, req interface{}) (int, http.Header, *HostsResponse, error) {
 	response := &HostsResponse{Hosts: []*Host{}}
 
-	rawHosts, err := hr.etcdClient.Get("/haproxy/hosts", true, false)
+	rawHosts, err := hr.etcdClient.Get("/vulcand/hosts", true, false)
 	if err != nil {
 		return http.StatusInternalServerError, nil, nil, err
 	}
@@ -41,19 +41,19 @@ func (hr *HostsResource) Index(u *url.URL, h http.Header, req interface{}) (int,
 			Name:      path.Base(node.Key),
 			Locations: []*Location{},
 		}
-		rawLocations, err := hr.etcdClient.Get(fmt.Sprintf("/haproxy/hosts/%s/locations", host.Name), true, false)
+		rawLocations, err := hr.etcdClient.Get(fmt.Sprintf("/vulcand/hosts/%s/locations", host.Name), true, false)
 		if err != nil {
 			return http.StatusInternalServerError, nil, nil, err
 		}
 
 		for _, locNode := range rawLocations.Node.Nodes {
 			location := &Location{Name: path.Base(locNode.Key)}
-			rawPath, err := hr.etcdClient.Get(fmt.Sprintf("/haproxy/hosts/%s/locations/%s/path", host.Name, location.Name), false, false)
+			rawPath, err := hr.etcdClient.Get(fmt.Sprintf("/vulcand/hosts/%s/locations/%s/path", host.Name, location.Name), false, false)
 			if err != nil {
 				return http.StatusInternalServerError, nil, nil, err
 			}
 			location.Path = rawPath.Node.Value
-			rawBackend, err := hr.etcdClient.Get(fmt.Sprintf("/haproxy/hosts/%s/locations/%s/backend", host.Name, location.Name), false, false)
+			rawBackend, err := hr.etcdClient.Get(fmt.Sprintf("/vulcand/hosts/%s/locations/%s/upstream", host.Name, location.Name), false, false)
 			if err != nil {
 				return http.StatusInternalServerError, nil, nil, err
 			}
